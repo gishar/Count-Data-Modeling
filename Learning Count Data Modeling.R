@@ -18,34 +18,6 @@ var(aadt$AADT) / mean(aadt$AADT)
 
 
 # Trying to find some dataset with var/mean value close to 1 to fit Poisson model
-library(MASS)
-data(Boston)
-hist(Boston$rm)
-mean(Boston$rm) / var(Boston$rm)
-
-library(countreg)
-data("Insurance")
-var(Insurance$Claims) / mean(Insurance$Claims)
-var(epil$y) / mean(epil$y)
-
-library(AER)
-data("Affairs")
-mean(Affairs$affairs) / var(Affairs$affairs)
-
-data("DoctorVisits")
-mean(DoctorVisits$visits) / var(DoctorVisits$visits)
-
-data("ShipAccidents")
-var(ShipAccidents$incidents) / mean(ShipAccidents$incidents)
-
-data("CrabSatellites")
-var(CrabSatellites$satellites) / mean(CrabSatellites$satellites)
-hist(CrabSatellites$satellites)
-
-data("CreditCard")
-var(CreditCard$reports) / mean(CreditCard$reports)
-hist(CreditCard$reports)
-
 data("EquationCitations")
 ?EquationCitations
 for (i in 5:13){
@@ -53,15 +25,6 @@ for (i in 5:13){
 }
 hist(EquationCitations$pages)
 var(EquationCitations$pages) / mean(EquationCitations$pages)
-
-data("GSS7402")
-var(GSS7402$kids) / mean(GSS7402$kids)
-
-data("Medicaid1986")
-var(Medicaid1986$visits) / mean(Medicaid1986$visits)
-
-data("NMES1988")
-var(NMES1988$visits) / mean(NMES1988$visits)
 
 data("PhDPublications")
 var(PhDPublications$articles) / mean(PhDPublications$articles)
@@ -71,8 +34,30 @@ table(PhDPublications$articles)
 
 # let's go with the number of articles PhD students from the PhDPublications dataset
 data("PhDPublications")
-?PhDPublications
 glimpse(PhDPublications)
+describe(PhDPublications)
+summary(PhDPublications)
+
+PhDPublications %>% 
+     group_by(married, gender) %>% 
+     summarise(Minimum = min(articles),
+               Maximum = max(articles),
+               Average = mean(articles),
+               Median = median(articles),
+               Range = max(articles) - min(articles),
+               Variance = var(articles),
+               StDev = sd(articles),
+               IQR = IQR(articles),
+               Counts = n(),
+               VarOverMean = var(articles)/mean(articles))
+
+table(PhDPublications$articles)
+
+hist(PhDPublications$articles, 
+     breaks = 30,
+     main = "Frequency of Article Counts",
+     col = 2,
+     xlab = "Number of Articles")
 
 ggplot(PhDPublications, 
        aes(articles)) +
@@ -84,19 +69,6 @@ ggplot(PhDPublications,
      labs(title="Histogram of Number of articles by gender and marital status") +
      facet_wrap(~gender,
                 ncol = 1)
-
-PhDPublications %>% 
-     group_by(married, gender) %>% 
-     summarise(minimum = min(articles),
-               maximum = max(articles),
-               average = mean(articles),
-               median = median(articles),
-               difference2 = max(articles) - min(articles),
-               variance = var(articles),
-               StDev = sd(articles),
-               IQR = IQR(articles),
-               counts = n(),
-               MyIndex = var(articles)/mean(articles))
 
 glm(articles ~ ., 
     data = PhDPublications,
