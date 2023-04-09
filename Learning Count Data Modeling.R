@@ -83,26 +83,35 @@ ggplot(PhDPublications,
 
 # Histogram of number of article published by married females
 PhDPublications %>% 
-     filter(married == "yes", gender == "female") %>% 
      ggplot(aes(x = articles,
                 fill = 'brown')) +
      geom_histogram(binwidth = 1,
                     col = 'black',
                     show.legend = F,
                     alpha = 0.6) +
-     labs(title = "Histogram of number of article published by married females",
+     labs(title = "Histogram of number of article by gender and marital status",
           x = "Articles",
           y = "Frequency") +
-     annotate(geom="text", 
-              x=5, 
-              y=60, 
-              label=paste("Average = ", round(mean(PhDPublications$articles[PhDPublications$gender=="female" & PhDPublications$married=="yes"]),1), 
-                          "\nMedian = ", median(PhDPublications$articles[PhDPublications$gender=="female" & PhDPublications$married=="yes"]),
-                          "\nVariance = ", round(var(PhDPublications$articles[PhDPublications$gender=="female" & PhDPublications$married=="yes"]),1)),
-              color="blue4")
-     
+     facet_wrap(gender ~ married,
+                nrow = 1)
 
-     
+boxplot(articles ~ gender + married, 
+        PhDPublications,
+        col = "gold2")
+
+
+plot(PhDPublications)
+cor(PhDPublications$articles, PhDPublications$prestige)
+cor(PhDPublications$articles, PhDPublications$prestige, method = "spearman")
+cor(PhDPublications$articles, PhDPublications$prestige, method = "kendall")
+
+
+glm(articles ~ prestige, 
+    data = PhDPublications,
+    family = "poisson") %>% 
+     summary()
+
+
 glm(articles ~ ., 
     data = PhDPublications,
     family = "poisson") %>% 
