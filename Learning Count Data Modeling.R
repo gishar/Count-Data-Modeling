@@ -9,7 +9,9 @@ options(digits = 3)
 options(scipen = 9)
 
 #---- Importing libraries ----
-lapply(c("tidyverse", "skimr", "AER", "ggplot2", "psych", "MASS"), require, character.only = T)
+lapply(c("tidyverse", "skimr", "AER", "ggplot2", "psych", "MASS"), 
+       require, 
+       character.only = T)
 
 #---- Importing some datasets ----
 aadt  <- read.csv("RoadInventorysample.csv")
@@ -62,6 +64,13 @@ PhDPublications %>%
 
 table(PhDPublications$articles)
 
+
+# Pairwise plot of all variables and some correlation between them
+plot(PhDPublications)
+cor(PhDPublications$articles, PhDPublications$prestige)
+cor(PhDPublications$articles, PhDPublications$prestige, method = "spearman")
+cor(PhDPublications$articles, PhDPublications$prestige, method = "kendall")
+
 # ---- Some histograms to see how article count is distributed
 # Histogram of number of article in the dataset
 hist(PhDPublications$articles, 
@@ -99,23 +108,18 @@ boxplot(articles ~ gender + married,
         PhDPublications,
         col = "gold2")
 
-
-plot(PhDPublications)
-cor(PhDPublications$articles, PhDPublications$prestige)
-cor(PhDPublications$articles, PhDPublications$prestige, method = "spearman")
-cor(PhDPublications$articles, PhDPublications$prestige, method = "kendall")
-
-
-glm(articles ~ prestige, 
-    data = PhDPublications,
-    family = "poisson") %>% 
-     summary()
+#---- GLM ----
+# Single variable
+Poisson.fit1 = glm(articles ~ prestige, 
+                   data = PhDPublications,
+                   family = "poisson") ; summary(Poisson.fit1)
 
 
-glm(articles ~ ., 
-    data = PhDPublications,
-    family = "poisson") %>% 
-     summary()
+Poisson.fit2 = glm(articles ~ . + gender*married - prestige, 
+                   data = PhDPublications,
+                   family = "poisson") ; summary(Poisson.fit2)
+
+
 
 # based on the (talk about dispersion) we know not to trust the std errors to decide what's statistically significant (talk details). 
 
