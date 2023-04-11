@@ -104,22 +104,66 @@ PhDPublications %>%
      facet_wrap(gender ~ married,
                 nrow = 1)
 
+# testing mean and variance of articles in different groups of prestige
+for (i in 0:ceiling(max(PhDPublications$prestige))) {
+     PhDPublications %>% 
+          filter(prestige > i & prestige < i+1) %>% 
+          summarise(mean(articles),
+                    var(articles)) %>% 
+          print()
+}
+
+
 boxplot(articles ~ gender + married, 
         PhDPublications,
         col = "gold2")
 
-#---- GLM ----
+
+#---- LM just to try ----
 # Single variable
+linear.fit1 = lm(articles ~ prestige, data = PhDPublications)
+summary(linear.fit1)
+par(mfrow = c(2,2)); plot(linear.fit1); par(mfrow = c(1,1))
+describe(linear.fit1$residuals)
+
+
+#---- GLM Single variable ----
 Poisson.fit1 = glm(articles ~ prestige, 
                    data = PhDPublications,
-                   family = "poisson") ; summary(Poisson.fit1)
+                   family = "poisson")
+summary(Poisson.fit1)
 
+par(mfrow = c(2,2)); plot(Poisson.fit1); par(mfrow = c(1,1))
+hist(Poisson.fit1$residuals)
+describe(Poisson.fit1$residuals)
+
+# ---- Clean Data from outlier ----
+PhDPublications$articles %>% table
+
+PhDPublicationsClean <- PhDPublications %>% 
+     filter(articles<8)
+
+boxplot(articles ~ gender + married, data = PhDPublications)
+
+Poisson.fit1.clean = glm(articles ~ prestige, 
+                   data = PhDPublicationsClean,
+                   family = "poisson")
+summary(Poisson.fit1.clean)
+
+par(mfrow = c(2,2)); plot(Poisson.fit1.clean); par(mfrow = c(1,1))
+hist(Poisson.fit1$residuals)
+describe(Poisson.fit1.clean$residuals)
+
+
+# ---- GLM Multi variable ----
 
 Poisson.fit2 = glm(articles ~ . + gender*married - prestige, 
                    data = PhDPublications,
                    family = "poisson") ; summary(Poisson.fit2)
 
-
+par(mfrow = c(2,2)); plot(Poisson.fit2); par(mfrow = c(1,1))
+hist(Poisson.fit2$residuals)
+describe(Poisson.fit2$residuals)
 
 # based on the (talk about dispersion) we know not to trust the std errors to decide what's statistically significant (talk details). 
 
