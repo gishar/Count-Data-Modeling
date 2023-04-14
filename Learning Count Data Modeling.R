@@ -127,7 +127,7 @@ par(mfrow = c(2,2)); plot(linear.fit1); par(mfrow = c(1,1))
 describe(linear.fit1$residuals)
 
 
-#---- GLM Single variable ----
+#---- Poisson Single variable ----
 Poisson.fit1 = glm(articles ~ prestige, 
                    data = PhDPublications,
                    family = "poisson")
@@ -145,6 +145,7 @@ PhDPublicationsClean <- PhDPublications %>%
 
 boxplot(articles ~ gender + married, data = PhDPublications)
 
+#---- Poisson Single variable Clean ----
 Poisson.fit1.clean = glm(articles ~ prestige, 
                    data = PhDPublicationsClean,
                    family = "poisson")
@@ -155,18 +156,49 @@ hist(Poisson.fit1$residuals)
 describe(Poisson.fit1.clean$residuals)
 
 
-# ---- GLM Multi variable ----
-
-Poisson.fit2 = glm(articles ~ . + gender*married - prestige, 
-                   data = PhDPublications,
+# ---- Poisson Multi variable clean ----
+# Used hybrid forward and backward stepwise selection method to find the best fit - final result below
+Poisson.fit2 = glm(articles ~ . - married,
+                   data = PhDPublicationsClean,
                    family = "poisson") ; summary(Poisson.fit2)
 
+# when you include interaction term, it will automatically include both terms
 par(mfrow = c(2,2)); plot(Poisson.fit2); par(mfrow = c(1,1))
 hist(Poisson.fit2$residuals)
 describe(Poisson.fit2$residuals)
 
 # based on the (talk about dispersion) we know not to trust the std errors to decide what's statistically significant (talk details). 
+# let's look at the summarized stat by gender only once again for the cleaned up data:
+PhDPublicationsClean %>% 
+     group_by(gender) %>% 
+     summarise(Minimum = min(articles),
+               Maximum = max(articles),
+               Average = mean(articles),
+               Median = median(articles),
+               Range = max(articles) - min(articles),
+               Variance = var(articles),
+               StDev = sd(articles),
+               IQR = IQR(articles),
+               Counts = n(),
+               VarOverMean = var(articles)/mean(articles),
+               .groups = 'drop')
 
+#---- NB Single variable Clean ----
+NB.fit1 = glm.nb(articles ~ prestige, data = PhDPublicationsClean) ; summary(NB.fit1)
+
+par(mfrow = c(2,2)); plot(NB.fit1); par(mfrow = c(1,1))
+hist(NB.fit1$residuals)
+describe(NB.fit1$residuals)
+
+
+#---- NB Multi variable Clean ----
+# Used hybrid forward and backward stepwise selection method to find the best fit - final result below
+NB.fit2 = glm.nb(articles ~ . - married, data = PhDPublicationsClean) ; summary(NB.fit2)
+
+# when you include interaction term, it will automatically include both terms
+par(mfrow = c(2,2)); plot(Poisson.fit2); par(mfrow = c(1,1))
+hist(Poisson.fit2$residuals)
+describe(Poisson.fit2$residuals)
 
 
 ##@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
